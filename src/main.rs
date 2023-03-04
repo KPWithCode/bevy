@@ -1,20 +1,22 @@
-mod crawler;
+mod crawlers {
+    pub mod uniswap {
+        pub mod liquidity;
+    }
+}
 use dotenv::dotenv;
 use std::env;
+use tokio::runtime::Runtime;
 
-use crawler::get_dex_liquidity;
+use crate::crawlers::uniswap::liquidity::get_uniswap_liquidity;
 
 
 fn main() {
     dotenv().ok();
-    let pancakeswap_url= env::var("PANCAKESWAP_URL").unwrap();
     let uniswap_url = env::var("UNISWAP_URL").unwrap();
-    let pancakeswap_liquidity = get_dex_liquidity(&pancakeswap_url, "USDT/BUSD").unwrap();
-    let uniswap_liquidity = get_dex_liquidity(&uniswap_url, "USDT/BUSD").unwrap();
-
-    // Get the liquidity of the USDT/BUSD pair on PancakeSwap
-    let pancakeswap_liquidity = get_dex_liquidity(&pancakeswap_liquidity, "USDT/BUSD").unwrap();
-    println!("uni: {}", uniswap_liquidity);
-    println!("ps: {}", pancakeswap_liquidity);
+    println!("UNIURL: {}", uniswap_url);
+    let token_pair = "DAI/USDC";
+    let rt = Runtime::new().unwrap();
+    let uniswap_tvl = rt.block_on(get_uniswap_liquidity(&uniswap_url, token_pair));
+    print!("uniTVL: {:?}", uniswap_tvl);
 
 }
